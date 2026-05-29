@@ -343,6 +343,7 @@ def run_full_automation() -> str:
 
     # Dtype-Fix: verhindert LossySetitemError beim späteren Status-Setzen
     df_plan["Status"] = df_plan["Status"].astype(object)
+    df_db["Master_Image_ID"] = df_db["Master_Image_ID"].astype(object)
 
     offene = df_plan[df_plan["Status"].isna()]
     if offene.empty:
