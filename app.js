@@ -7,7 +7,7 @@ const CLIPS = [
   { text: 'Ich erkenne ein gutes Auto daran, wie bequem der Beifahrersitz ist.',  file: 'audio/clip_04.mp3' },
   { text: 'Mein Lieblingsauto ist das, in dem mich andere mitnehmen.',            file: 'audio/clip_05.mp3' },
   { text: 'Alkoholische Mitarbeit ist heute ausdrücklich erwünscht.',             file: 'audio/clip_06.mp3' },
-  { text: 'Ich fühle mich wie 2009 im Bierkönig.',                               file: 'audio/clip_07.mp3' },
+  { text: 'Ich fühle mich wie 2012 im Bierkönig.',                               file: 'audio/clip_07.mp3' },
   { text: 'Mein Verantwortungsbereich endet ab dem zweiten Bier.',               file: 'audio/clip_08.mp3' },
 ];
 
