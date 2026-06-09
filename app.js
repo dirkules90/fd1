@@ -12,6 +12,13 @@ const CLIPS = [
 ];
 
 const audioCache = {};
+let activeAudio = null;
+
+function setPlaying(btn, isPlaying) {
+  const avatarWrap = document.getElementById('avatarWrap');
+  btn.classList.toggle('playing', isPlaying);
+  avatarWrap?.classList.toggle('playing', isPlaying);
+}
 
 // ── DOM refs ──────────────────────────────────────────────────────────────────
 
@@ -126,7 +133,12 @@ async function synthesize(text) {
 }
 
 function playUrl(url) {
+  if (activeAudio) {
+    activeAudio.pause();
+    activeAudio.currentTime = 0;
+  }
   const audio = new Audio(url);
+  activeAudio = audio;
   audio.play().catch(() => {});
   return audio;
 }
@@ -190,9 +202,9 @@ async function handleClipClick(btn, clip, index) {
 
   // Bereits gecacht → sofort abspielen
   if (audioCache[cacheKey]) {
-    btn.classList.add('playing');
+    setPlaying(btn, true);
     const audio = playUrl(audioCache[cacheKey]);
-    audio.addEventListener('ended', () => btn.classList.remove('playing'));
+    audio.addEventListener('ended', () => setPlaying(btn, false));
     return;
   }
 
@@ -200,7 +212,6 @@ async function handleClipClick(btn, clip, index) {
   stateEl.innerHTML = '<span class="spinner"></span>';
 
   try {
-    // Erst lokale MP3 versuchen (nach Colab-Export)
     const localRes = await fetch(clip.file).catch(() => null);
 
     let url;
@@ -208,7 +219,6 @@ async function handleClipClick(btn, clip, index) {
       const blob = await localRes.blob();
       url = URL.createObjectURL(blob);
     } else {
-      // Fallback: ElevenLabs API (falls konfiguriert)
       url = await synthesize(clip.text);
     }
 
@@ -218,9 +228,9 @@ async function handleClipClick(btn, clip, index) {
     stateEl.textContent = '✓';
     stateEl.className = 'clip-state cached';
 
-    btn.classList.add('playing');
+    setPlaying(btn, true);
     const audio = playUrl(url);
-    audio.addEventListener('ended', () => btn.classList.remove('playing'));
+    audio.addEventListener('ended', () => setPlaying(btn, false));
   } catch (e) {
     stateEl.textContent = '✗';
     stateEl.className = 'clip-state';
