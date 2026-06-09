@@ -1,14 +1,14 @@
 'use strict';
 
 const CLIPS = [
-  'Wer auf Toilette möchte, hebt bitte die Hand.',
-  'Heute geht die erste Runde Bier selbstverständlich auf mich.',
-  'Der Herr ist mein Hirte. Mein Fahrer ist heute Pascal.',
-  'Ich erkenne ein gutes Auto daran, wie bequem der Beifahrersitz ist.',
-  'Mein Lieblingsauto ist das, in dem mich andere mitnehmen.',
-  'Alkoholische Mitarbeit ist heute ausdrücklich erwünscht.',
-  'Ich fühle mich wie 2009 im Bierkönig.',
-  'Mein Verantwortungsbereich endet ab dem zweiten Bier.',
+  { text: 'Wer auf Toilette möchte, hebt bitte die Hand.',                       file: 'audio/clip_01.mp3' },
+  { text: 'Heute geht die erste Runde Bier selbstverständlich auf mich.',         file: 'audio/clip_02.mp3' },
+  { text: 'Der Herr ist mein Hirte. Mein Fahrer ist heute Pascal.',               file: 'audio/clip_03.mp3' },
+  { text: 'Ich erkenne ein gutes Auto daran, wie bequem der Beifahrersitz ist.',  file: 'audio/clip_04.mp3' },
+  { text: 'Mein Lieblingsauto ist das, in dem mich andere mitnehmen.',            file: 'audio/clip_05.mp3' },
+  { text: 'Alkoholische Mitarbeit ist heute ausdrücklich erwünscht.',             file: 'audio/clip_06.mp3' },
+  { text: 'Ich fühle mich wie 2009 im Bierkönig.',                               file: 'audio/clip_07.mp3' },
+  { text: 'Mein Verantwortungsbereich endet ab dem zweiten Bier.',               file: 'audio/clip_08.mp3' },
 ];
 
 const audioCache = {};
@@ -159,10 +159,10 @@ speakBtn.addEventListener('click', async () => {
 function buildClips() {
   clipsGrid.innerHTML = '';
 
-  CLIPS.forEach((text, i) => {
+  CLIPS.forEach((clip, i) => {
     const btn = document.createElement('button');
     btn.className = 'clip-btn';
-    btn.setAttribute('aria-label', text);
+    btn.setAttribute('aria-label', clip.text);
     btn.dataset.index = i;
 
     btn.innerHTML = `
@@ -174,22 +174,24 @@ function buildClips() {
         </span>
         <span class="clip-state" data-state="${i}"></span>
       </div>
-      <span class="clip-text">${text}</span>
+      <span class="clip-text">${clip.text}</span>
     `;
 
-    btn.addEventListener('click', () => handleClipClick(btn, text, i));
+    btn.addEventListener('click', () => handleClipClick(btn, clip, i));
     clipsGrid.appendChild(btn);
   });
 }
 
-async function handleClipClick(btn, text, index) {
+async function handleClipClick(btn, clip, index) {
   if (btn.classList.contains('loading')) return;
 
   const stateEl = btn.querySelector(`[data-state="${index}"]`);
+  const cacheKey = clip.file;
 
-  if (audioCache[text]) {
+  // Bereits gecacht → sofort abspielen
+  if (audioCache[cacheKey]) {
     btn.classList.add('playing');
-    const audio = playUrl(audioCache[text]);
+    const audio = playUrl(audioCache[cacheKey]);
     audio.addEventListener('ended', () => btn.classList.remove('playing'));
     return;
   }
@@ -198,9 +200,21 @@ async function handleClipClick(btn, text, index) {
   stateEl.innerHTML = '<span class="spinner"></span>';
 
   try {
-    const url = await synthesize(text);
+    // Erst lokale MP3 versuchen (nach Colab-Export)
+    const localRes = await fetch(clip.file).catch(() => null);
+
+    let url;
+    if (localRes && localRes.ok) {
+      const blob = await localRes.blob();
+      url = URL.createObjectURL(blob);
+    } else {
+      // Fallback: ElevenLabs API (falls konfiguriert)
+      url = await synthesize(clip.text);
+    }
+
     if (!url) return;
 
+    audioCache[cacheKey] = url;
     stateEl.textContent = '✓';
     stateEl.className = 'clip-state cached';
 
