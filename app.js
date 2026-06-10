@@ -14,8 +14,8 @@ const CATEGORIES = [
   {
     label: 'Pascal',
     clips: [
-      { text: 'Pascal, dafür dass du mich ständig fährst, zahle ich heute für dich. Ich liebe dich.', file: 'audio/clip_12.mp3' },
-      { text: 'Der Herr ist mein Hirte. Mein Fahrer ist heute Pascal.',                               file: 'audio/clip_03.mp3' },
+      { text: 'Pascal, dafür dass du mich ständig fährst, zahle ich heute für dich und ich liebe dich.', file: 'audio/clip_12.mp3' },
+      { text: 'Der Herr ist mein Hirte und mein Fahrer ist heute Pascal.',                               file: 'audio/clip_03.mp3' },
     ]
   },
   {
