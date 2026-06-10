@@ -1,31 +1,71 @@
 'use strict';
 
-const CLIPS = [
-  { text: 'Wer auf Toilette möchte, hebt bitte die Hand.',                       file: 'audio/clip_01.mp3' },
-  { text: 'Heute geht die erste Runde Bier selbstverständlich auf mich.',         file: 'audio/clip_02.mp3' },
-  { text: 'Der Herr ist mein Hirte. Mein Fahrer ist heute Pascal.',               file: 'audio/clip_03.mp3' },
-  { text: 'Ich erkenne ein gutes Auto daran, wie bequem der Beifahrersitz ist.',  file: 'audio/clip_04.mp3' },
-  { text: 'Mein Lieblingsauto ist das, in dem mich andere mitnehmen.',            file: 'audio/clip_05.mp3' },
-  { text: 'Alkoholische Mitarbeit ist heute ausdrücklich erwünscht.',             file: 'audio/clip_06.mp3' },
-  { text: 'Ich fühle mich wie 2012 im Bierkönig.',                               file: 'audio/clip_07.mp3' },
-  { text: 'Mein Verantwortungsbereich endet ab dem zweiten Bier.',               file: 'audio/clip_08.mp3' },
+const CATEGORIES = [
+  {
+    label: 'Führerschein',
+    clips: [
+      { text: 'Mein Führerschein ist wie Gott: Viele glauben daran, gesehen hat ihn noch keiner.', file: 'audio/clip_09.mp3' },
+      { text: 'Andere sammeln Kilometer, ich sammle Mitfahrten.',                                   file: 'audio/clip_10.mp3' },
+      { text: 'Ich erkenne ein gutes Auto daran, wie bequem der Beifahrersitz ist.',                file: 'audio/clip_04.mp3' },
+      { text: 'Mein Lieblingsauto ist das, in dem mich andere mitnehmen.',                         file: 'audio/clip_05.mp3' },
+      { text: 'Ich bin der Beweis dafür, dass man auch ohne Führerschein im Leben völlig in die falsche Richtung fahren kann.', file: 'audio/clip_11.mp3' },
+    ]
+  },
+  {
+    label: 'Pascal',
+    clips: [
+      { text: 'Pascal, dafür dass du mich ständig fährst, zahle ich heute für dich. Ich liebe dich.', file: 'audio/clip_12.mp3' },
+      { text: 'Der Herr ist mein Hirte. Mein Fahrer ist heute Pascal.',                               file: 'audio/clip_03.mp3' },
+    ]
+  },
+  {
+    label: 'Alkohol',
+    clips: [
+      { text: 'Wenn der Pegel steigt, sinkt das Niveau.',                     file: 'audio/clip_13.mp3' },
+      { text: 'Der Geist ist willig, aber das Bier ist kalt.',                 file: 'audio/clip_14.mp3' },
+      { text: 'Nich lang schnacken, Kopf in Nacken',                          file: 'audio/clip_15.mp3' },
+      { text: 'Delirium, Delarium - Voll wie ein Aquarium',                   file: 'audio/clip_16.mp3' },
+      { text: 'Ich fühle mich wie 2012 im Bierkönig.',                        file: 'audio/clip_07.mp3' },
+      { text: 'Alkoholische Mitarbeit ist heute ausdrücklich erwünscht.',      file: 'audio/clip_06.mp3' },
+      { text: 'Mein Verantwortungsbereich endet ab dem zweiten Bier.',        file: 'audio/clip_08.mp3' },
+      { text: 'Heute geht die erste Runde Bier selbstverständlich auf mich.', file: 'audio/clip_02.mp3' },
+    ]
+  },
+  {
+    label: 'Anderes',
+    clips: [
+      { text: 'Wer auf Toilette möchte, hebt bitte die Hand.', file: 'audio/clip_01.mp3' },
+    ]
+  },
 ];
 
 const audioCache = {};
-let activeAudio = null;
+let activeAudio  = null;
+let activeBtn    = null;
 
 const clipsGrid = document.getElementById('clipsGrid');
-const toast      = document.getElementById('toast');
-const lightbox   = document.getElementById('lightbox');
-const avatarImg  = document.getElementById('avatarImg');
+const toast     = document.getElementById('toast');
+const lightbox  = document.getElementById('lightbox');
+const avatarImg = document.getElementById('avatarImg');
 
 avatarImg.addEventListener('click', () => lightbox.classList.add('open'));
 lightbox.addEventListener('click',  () => lightbox.classList.remove('open'));
 
+function clearPlaying() {
+  if (activeBtn) activeBtn.classList.remove('playing');
+  activeBtn = null;
+  document.getElementById('avatarWrap')?.classList.remove('playing');
+}
+
 function setPlaying(btn, isPlaying) {
-  const avatarWrap = document.getElementById('avatarWrap');
-  btn.classList.toggle('playing', isPlaying);
-  avatarWrap?.classList.toggle('playing', isPlaying);
+  if (isPlaying) {
+    clearPlaying();
+    btn.classList.add('playing');
+    activeBtn = btn;
+    document.getElementById('avatarWrap')?.classList.add('playing');
+  } else if (activeBtn === btn) {
+    clearPlaying();
+  }
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
@@ -56,26 +96,39 @@ function playUrl(url) {
 function buildClips() {
   clipsGrid.innerHTML = '';
 
-  CLIPS.forEach((clip, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'clip-btn';
-    btn.setAttribute('aria-label', clip.text);
-    btn.dataset.index = i;
+  let globalIndex = 0;
+  CATEGORIES.forEach(cat => {
+    const header = document.createElement('h3');
+    header.className = 'category-header';
+    header.textContent = cat.label;
+    clipsGrid.appendChild(header);
 
-    btn.innerHTML = `
-      <div class="clip-icon-row">
-        <span class="clip-play-icon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="5 3 19 12 5 21 5 3"/>
-          </svg>
-        </span>
-        <span class="clip-state" data-state="${i}"></span>
-      </div>
-      <span class="clip-text">${clip.text}</span>
-    `;
+    const grid = document.createElement('div');
+    grid.className = 'clips-grid';
+    clipsGrid.appendChild(grid);
 
-    btn.addEventListener('click', () => handleClipClick(btn, clip, i));
-    clipsGrid.appendChild(btn);
+    cat.clips.forEach(clip => {
+      const i = globalIndex++;
+      const btn = document.createElement('button');
+      btn.className = 'clip-btn';
+      btn.setAttribute('aria-label', clip.text);
+      btn.dataset.index = i;
+
+      btn.innerHTML = `
+        <div class="clip-icon-row">
+          <span class="clip-play-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+          </span>
+          <span class="clip-state" data-state="${i}"></span>
+        </div>
+        <span class="clip-text">${clip.text}</span>
+      `;
+
+      btn.addEventListener('click', () => handleClipClick(btn, clip, i));
+      grid.appendChild(btn);
+    });
   });
 }
 
