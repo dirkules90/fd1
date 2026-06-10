@@ -15,7 +15,12 @@ const audioCache = {};
 let activeAudio = null;
 
 const clipsGrid = document.getElementById('clipsGrid');
-const toast     = document.getElementById('toast');
+const toast      = document.getElementById('toast');
+const lightbox   = document.getElementById('lightbox');
+const avatarImg  = document.getElementById('avatarImg');
+
+avatarImg.addEventListener('click', () => lightbox.classList.add('open'));
+lightbox.addEventListener('click',  () => lightbox.classList.remove('open'));
 
 function setPlaying(btn, isPlaying) {
   const avatarWrap = document.getElementById('avatarWrap');
