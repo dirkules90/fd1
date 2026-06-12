@@ -167,27 +167,22 @@ async function handleSpezialClick(btn, clip, index) {
   }
 }
 
-// Long-press avatar (1.5s) → Spezial Mode
-let pressTimer       = null;
-let specialTriggered = false;
+// Long-press "Alex" title (1.5s) → Spezial Mode
+const heroName = document.getElementById('heroName');
+let pressTimer = null;
 
-avatarImg.addEventListener('pointerdown', () => {
-  specialTriggered = false;
+heroName.addEventListener('pointerdown', () => {
   pressTimer = setTimeout(() => {
-    specialTriggered = true;
-    avatarImg.classList.remove('pressing');
+    heroName.classList.remove('pressing');
     openSpezialMode();
   }, 1500);
-  avatarImg.classList.add('pressing');
+  heroName.classList.add('pressing');
 });
 
-avatarImg.addEventListener('pointerup',    () => { clearTimeout(pressTimer); avatarImg.classList.remove('pressing'); });
-avatarImg.addEventListener('pointerleave', () => { clearTimeout(pressTimer); avatarImg.classList.remove('pressing'); });
+heroName.addEventListener('pointerup',    () => { clearTimeout(pressTimer); heroName.classList.remove('pressing'); });
+heroName.addEventListener('pointerleave', () => { clearTimeout(pressTimer); heroName.classList.remove('pressing'); });
 
-avatarImg.addEventListener('click', () => {
-  if (specialTriggered) { specialTriggered = false; return; }
-  lightbox.classList.add('open');
-});
+avatarImg.addEventListener('click', () => lightbox.classList.add('open'));
 
 // ── Easter Egg ────────────────────────────────────────────────────────────────
 // 10× auf das große Foto klicken innerhalb von 3 Sekunden → Vettel-Video
