@@ -73,7 +73,7 @@ lightboxImg.addEventListener('click', (e) => {
     lightbox.classList.remove('open');
     easterVideo.currentTime = 0;
     videoOverlay.classList.add('open');
-    easterVideo.play().catch(() => showToast('Video nicht gefunden – bitte vettel_cut.mp4 in audio/ hochladen.'));
+    easterVideo.play().catch(() => showToast('Video konnte nicht abgespielt werden.'));
     easterVideo.addEventListener('ended', () => videoOverlay.classList.remove('open'), { once: true });
   }
 });
