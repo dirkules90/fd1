@@ -48,8 +48,146 @@ const toast     = document.getElementById('toast');
 const lightbox  = document.getElementById('lightbox');
 const avatarImg = document.getElementById('avatarImg');
 
-avatarImg.addEventListener('click', () => lightbox.classList.add('open'));
-lightbox.addEventListener('click',  () => lightbox.classList.remove('open'));
+lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+
+// ── Spezial Mode ──────────────────────────────────────────────────────────────
+
+const SPEZIAL_CLIPS = [
+  { text: 'Arianne',                          file: 'spezial/Arianne.mp3' },
+  { text: 'Blau blüht der Enzian',            file: 'spezial/Blau blüht der Enzian.mp3' },
+  { text: 'Das Wandern ist des Müllers Lust', file: 'spezial/Das Wandern ist des Müllers Lust.mp3' },
+  { text: 'Froh im Sinn',                     file: 'spezial/Froh im Sinn.mp3' },
+  { text: 'Heilige Delfine',                  file: 'spezial/Heilige Delfine.mp3' },
+  { text: 'Kultureller Urlaub',               file: 'spezial/Kultureller Urlaub.mp3' },
+  { text: 'Pascal, Ratti und Herr Schmidt',   file: 'spezial/Pascal, Ratti und Herr Schmidt.mp3' },
+  { text: 'Zum Städele hinaus',               file: 'spezial/Zum Städele hinaus.mp3' },
+];
+
+const spezialCache = {};
+let spezialAudio      = null;
+let spezialActiveBtn  = null;
+
+function clearSpezialPlaying() {
+  if (spezialActiveBtn) spezialActiveBtn.classList.remove('playing');
+  spezialActiveBtn = null;
+}
+
+function setSpezialPlaying(btn, isPlaying) {
+  if (isPlaying) {
+    clearSpezialPlaying();
+    btn.classList.add('playing');
+    spezialActiveBtn = btn;
+  } else if (spezialActiveBtn === btn) {
+    clearSpezialPlaying();
+  }
+}
+
+function openSpezialMode() {
+  clearPlaying();
+  if (activeAudio) { activeAudio.pause(); activeAudio = null; }
+  document.getElementById('spezialOverlay').classList.add('open');
+  history.pushState({ spezial: true }, '');
+}
+
+function closeSpezialMode() {
+  if (spezialAudio) { spezialAudio.pause(); spezialAudio = null; }
+  clearSpezialPlaying();
+  document.getElementById('spezialOverlay').classList.remove('open');
+}
+
+window.addEventListener('popstate', () => {
+  if (document.getElementById('spezialOverlay').classList.contains('open')) {
+    closeSpezialMode();
+  }
+});
+
+document.getElementById('spezialBack').addEventListener('click', () => {
+  history.back();
+});
+
+function buildSpezialButtons() {
+  const grid = document.getElementById('spezialGrid');
+  grid.innerHTML = '';
+  SPEZIAL_CLIPS.forEach((clip, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'spezial-btn';
+    btn.setAttribute('aria-label', clip.text);
+    btn.style.animationDelay = (i * 0.3) + 's';
+    btn.innerHTML = `
+      <div class="clip-icon-row">
+        <span class="spezial-play-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </span>
+        <span class="spezial-state" data-spezial="${i}"></span>
+      </div>
+      <span class="clip-text">${clip.text}</span>
+    `;
+    btn.addEventListener('click', () => handleSpezialClick(btn, clip, i));
+    grid.appendChild(btn);
+  });
+}
+
+async function handleSpezialClick(btn, clip, index) {
+  if (btn.classList.contains('loading')) return;
+  const stateEl  = btn.querySelector(`[data-spezial="${index}"]`);
+  const cacheKey = clip.file;
+
+  if (spezialCache[cacheKey]) {
+    if (spezialAudio) { spezialAudio.pause(); spezialAudio.currentTime = 0; }
+    setSpezialPlaying(btn, true);
+    const audio = new Audio(spezialCache[cacheKey]);
+    spezialAudio = audio;
+    audio.play().catch(() => {});
+    audio.addEventListener('ended', () => setSpezialPlaying(btn, false));
+    return;
+  }
+
+  btn.classList.add('loading');
+  stateEl.innerHTML = '<span class="spinner" style="border-top-color:#ffd700"></span>';
+
+  try {
+    const res = await fetch(clip.file).catch(() => null);
+    if (!res || !res.ok) { showToast('Datei nicht gefunden.'); return; }
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    spezialCache[cacheKey] = url;
+    stateEl.textContent = '✓';
+    stateEl.style.color = '#ffd700';
+    if (spezialAudio) { spezialAudio.pause(); spezialAudio.currentTime = 0; }
+    setSpezialPlaying(btn, true);
+    const audio = new Audio(url);
+    spezialAudio = audio;
+    audio.play().catch(() => {});
+    audio.addEventListener('ended', () => setSpezialPlaying(btn, false));
+  } catch (e) {
+    stateEl.textContent = '✗';
+    showToast('Fehler: ' + e.message);
+  } finally {
+    btn.classList.remove('loading');
+  }
+}
+
+// Long-press avatar (1.5s) → Spezial Mode
+let pressTimer       = null;
+let specialTriggered = false;
+
+avatarImg.addEventListener('pointerdown', () => {
+  specialTriggered = false;
+  pressTimer = setTimeout(() => {
+    specialTriggered = true;
+    avatarImg.classList.remove('pressing');
+    openSpezialMode();
+  }, 1500);
+  avatarImg.classList.add('pressing');
+});
+
+avatarImg.addEventListener('pointerup',    () => { clearTimeout(pressTimer); avatarImg.classList.remove('pressing'); });
+avatarImg.addEventListener('pointerleave', () => { clearTimeout(pressTimer); avatarImg.classList.remove('pressing'); });
+
+avatarImg.addEventListener('click', () => {
+  if (specialTriggered) { specialTriggered = false; return; }
+  lightbox.classList.add('open');
+});
 
 // ── Easter Egg ────────────────────────────────────────────────────────────────
 // 10× auf das große Foto klicken innerhalb von 3 Sekunden → Vettel-Video
@@ -283,3 +421,4 @@ speakBtn.addEventListener('click', async () => {
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 buildClips();
+buildSpezialButtons();
