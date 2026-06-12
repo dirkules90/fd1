@@ -51,6 +51,38 @@ const avatarImg = document.getElementById('avatarImg');
 avatarImg.addEventListener('click', () => lightbox.classList.add('open'));
 lightbox.addEventListener('click',  () => lightbox.classList.remove('open'));
 
+// ── Easter Egg ────────────────────────────────────────────────────────────────
+// 10× auf das große Foto klicken innerhalb von 3 Sekunden → Vettel-Video
+
+const lightboxImg   = document.getElementById('lightboxImg');
+const videoOverlay  = document.getElementById('videoOverlay');
+const easterVideo   = document.getElementById('easterEggVideo');
+
+let eggClicks = 0;
+let eggTimer  = null;
+
+lightboxImg.addEventListener('click', (e) => {
+  e.stopPropagation(); // Lightbox nicht schließen beim Klick auf's Foto
+
+  eggClicks++;
+  clearTimeout(eggTimer);
+  eggTimer = setTimeout(() => { eggClicks = 0; }, 3000);
+
+  if (eggClicks >= 10) {
+    eggClicks = 0;
+    lightbox.classList.remove('open');
+    easterVideo.currentTime = 0;
+    videoOverlay.classList.add('open');
+    easterVideo.play().catch(() => showToast('Video nicht gefunden – bitte vettel_cut.mp4 in audio/ hochladen.'));
+    easterVideo.addEventListener('ended', () => videoOverlay.classList.remove('open'), { once: true });
+  }
+});
+
+videoOverlay.addEventListener('click', () => {
+  easterVideo.pause();
+  videoOverlay.classList.remove('open');
+});
+
 function clearPlaying() {
   if (activeBtn) activeBtn.classList.remove('playing');
   activeBtn = null;
