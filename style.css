@@ -1,3 +1,6 @@
+/* Eingeloggte Nutzer sehen das Gate nie – kein Flackern */
+.authed .gate { display: none !important; }
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -671,3 +674,106 @@ html, body {
   opacity: 0.7;
   transition: opacity 0.2s;
 }
+
+/* ── Password Gate ── */
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 32px 20px 48px;
+}
+
+.gate.hidden { display: none; }
+
+.gate-inner {
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.gate-title {
+  font-size: clamp(1.35rem, 5.5vw, 1.9rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-align: center;
+  line-height: 1.2;
+  background: linear-gradient(135deg, #fff 25%, var(--accent-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gate-img {
+  width: 100%;
+  max-width: 340px;
+  border-radius: 20px;
+  box-shadow: 0 8px 48px rgba(124, 58, 237, 0.3), 0 2px 16px rgba(0,0,0,0.6);
+  display: block;
+}
+
+.gate-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gate-input {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 14px 16px;
+  outline: none;
+  width: 100%;
+  text-align: center;
+  letter-spacing: 0.06em;
+  transition: border-color 0.15s;
+}
+
+.gate-input::placeholder { color: var(--text-muted); letter-spacing: 0; }
+.gate-input:focus { border-color: var(--accent); }
+
+.gate-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  width: 100%;
+}
+
+.gate-btn:hover  { background: var(--accent-hover); }
+.gate-btn:active { transform: scale(0.98); }
+
+.gate-error {
+  font-size: 0.82rem;
+  color: var(--error);
+  text-align: center;
+  min-height: 20px;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60%  { transform: translateX(-7px); }
+  40%, 80%  { transform: translateX(7px); }
+}
+
+.gate-input.shake { animation: shake 0.4s ease; }

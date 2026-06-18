@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Alex – Soundboard</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Verhindert Flackern bei bereits eingeloggten Nutzern -->
+  <script>if(localStorage.getItem('sb_auth')==='1'){document.documentElement.classList.add('authed');}</script>
 </head>
 <body>
 
@@ -116,6 +118,19 @@
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>
+
+  <!-- Password Gate -->
+  <div class="gate" id="gate">
+    <div class="gate-inner">
+      <h1 class="gate-title">Ich wünsche euch eine schöne WM!</h1>
+      <img src="audio/alex_wm.png" alt="Alex WM" class="gate-img">
+      <div class="gate-form">
+        <input type="password" id="gateInput" class="gate-input" placeholder="Passwort eingeben …" autocomplete="off">
+        <button class="gate-btn" id="gateBtn">Los geht's ›</button>
+        <p class="gate-error" id="gateError"></p>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>

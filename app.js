@@ -413,6 +413,38 @@ speakBtn.addEventListener('click', async () => {
 });
 */
 
+// ── Password Gate ────────────────────────────────────────────────────────────
+
+(function () {
+  const gate       = document.getElementById('gate');
+  const gateInput  = document.getElementById('gateInput');
+  const gateBtn    = document.getElementById('gateBtn');
+  const gateError  = document.getElementById('gateError');
+
+  if (localStorage.getItem('sb_auth') === '1') {
+    gate.classList.add('hidden');
+    return;
+  }
+
+  function tryUnlock() {
+    if (gateInput.value === 'Deutschland') {
+      localStorage.setItem('sb_auth', '1');
+      gate.classList.add('hidden');
+    } else {
+      gateError.textContent = 'Falsches Passwort – versuch's nochmal.';
+      gateInput.classList.remove('shake');
+      void gateInput.offsetWidth;
+      gateInput.classList.add('shake');
+      gateInput.value = '';
+      setTimeout(() => gateError.textContent = '', 2500);
+    }
+  }
+
+  gateBtn.addEventListener('click', tryUnlock);
+  gateInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
+  gateInput.addEventListener('animationend', () => gateInput.classList.remove('shake'));
+}());
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 buildClips();
