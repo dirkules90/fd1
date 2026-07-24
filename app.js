@@ -427,7 +427,7 @@ speakBtn.addEventListener('click', async () => {
   }
 
   function tryUnlock() {
-    if (gateInput.value === 'Deutschland') {
+    if (gateInput.value.trim() === 'Deutschland') {
       localStorage.setItem('sb_auth', '1');
       gate.classList.add('hidden');
     } else {
