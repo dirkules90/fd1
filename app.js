@@ -431,7 +431,7 @@ speakBtn.addEventListener('click', async () => {
       localStorage.setItem('sb_auth', '1');
       gate.classList.add('hidden');
     } else {
-      gateError.textContent = 'Falsches Passwort – versuch's nochmal.';
+      gateError.textContent = 'Falsches Passwort – versuchs nochmal.';
       gateInput.classList.remove('shake');
       void gateInput.offsetWidth;
       gateInput.classList.add('shake');
